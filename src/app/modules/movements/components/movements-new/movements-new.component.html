@@ -1,0 +1,105 @@
+<!--****** header ******-->
+<div class="card shadow rounded border-light-subtle p-3 mb-3">
+  <div class="row">
+    <div class="col-12 d-flex align-items-start">
+
+      <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb pb-1 mb-1">
+          <li class="breadcrumb-item fs-5">
+            <a href="/dashboard" class="text-decoration-none text-dark">
+              <i class="fa-solid fa-house me-1"></i>
+              Inicio
+            </a>
+          </li>
+          <li class="breadcrumb-item fs-5">
+            <a class="text-decoration-none text-dark" style="cursor: pointer" (click)="location.back()">
+              Movimientos
+            </a>
+          </li>
+          <li class="breadcrumb-item active fs-5" aria-current="page">
+            Nuevo
+          </li>
+        </ol>
+      </nav>
+
+    </div>
+  </div>
+</div>
+
+
+<!--****** form ******-->
+<div class="card shadow rounded border-light-subtle p-3">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <div class="col-4">
+
+        <!-- Type Movement -->
+        <div class="form-floating mb-3">
+          <select class="form-select" id="typeSelect" formControlName="type" required>
+            <option value="INGRESO">INGRESO</option>
+            <option value="EGRESO">EGRESO</option>
+          </select>
+          <label for="typeSelect">Tipo de movimiento</label>
+        </div>
+
+        <!-- Payment method -->
+        <div class="form-floating mb-3">
+          <select class="form-select" id="paymentSelect" formControlName="paymentMethod" required>
+            <option value="EFECTIVO">EFECTIVO</option>
+            <option value="YAPE">YAPE</option>
+            <option value="TARJETA">TARJETA</option>
+            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+          </select>
+          <label for="paymentSelect">Metodo de pago</label>
+        </div>
+
+        <!-- groups -->
+        <div class="form-floating mb-3">
+          <select class="form-select" id="groupsSelect" formControlName="group">
+            <option value="NINGUNO">NINGUNO</option>
+            <option value="YAPE">YAPE</option>
+            <option value="TARJETA">TARJETA</option>
+            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+          </select>
+          <label for="groupsSelect">Grupo</label>
+        </div>
+
+        <!-- description -->
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="descriptionInput" placeholder="Descripción"
+                 formControlName="description" required>
+          <label for="descriptionInput">Descripción</label>
+        </div>
+
+        <!-- amount -->
+        <div class="form-floating mb-3">
+          <input type="number" class="form-control" id="amountInput" placeholder="Monto S/." formControlName="amount" required>
+          <label for="amountInput">Monto S/.</label>
+        </div>
+
+        <!-- comments -->
+        <div class="form-floating">
+          <textarea class="form-control" placeholder="Observaciones" id="commentsTextarea"
+                    formControlName="comments" style="height: 120px;"></textarea>
+          <label for="commentsTextarea">Observaciones</label>
+        </div>
+      </div>
+      <div class="col-4">
+
+        <!-- receipt url -->
+        <div class="mb-3">
+          <label for="formFile" class="form-label">Adjuntar imagen del recibo</label>
+          <input class="form-control" type="file" id="formFile" (change)="onFileSelected($event)">
+        </div>
+
+        <!-- buttons -->
+        <button type="submit" class="btn btn-success w-50" [disabled]="form.invalid || loading">Guardar</button>
+
+        <div *ngIf="error">{{ error }}</div>
+
+      </div>
+      <div class="col-4">
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,12 @@
+<div class="row">
+  @for (module of listModules; track module.name) {
+    <div class="col-3 col-xl-2 mb-3">
+      <div style="cursor: pointer" class="card shadow border-light-subtle rounded p-3 text-center"
+           (click)="router.navigate([module.url])">
+
+        <i class="{{module.icon}} fa-3x mb-3"></i>
+        <p class="fs-5">{{ module.name }}</p>
+      </div>
+    </div>
+  }
+</div>

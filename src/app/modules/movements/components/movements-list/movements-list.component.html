@@ -1,0 +1,86 @@
+<!--****** header ******-->
+<div class="card shadow rounded border-light-subtle p-3">
+  <div class="row">
+    <div class="col-8 d-flex align-items-start">
+
+      <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb pb-0 mb-0">
+          <li class="breadcrumb-item fs-5">
+            <a href="/dashboard" class="text-decoration-none text-dark">
+              <i class="fa-solid fa-house me-1"></i>
+              Inicio
+            </a>
+          </li>
+          <li class="breadcrumb-item active fs-5" aria-current="page">
+            Movimientos
+          </li>
+        </ol>
+      </nav>
+
+    </div>
+    <div class="col-4 d-flex justify-content-end">
+      <button type="button" class="btn btn-primary me-2" (click)="router.navigate(['/movements/new'])">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+      <button type="button" class="btn btn-success me-2">
+        <i class="fa-solid fa-file-excel"></i>
+      </button>
+      <button type="button" class="btn btn-danger me-2">
+        <i class="fa-solid fa-file-pdf"></i>
+      </button>
+      <button type="button" class="btn btn-secondary">
+        <i class="fa-solid fa-print"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!--****** list ******-->
+<div class="card shadow rounded border-light-subtle p-3">
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+      <tr class="text-nowrap">
+        <th scope="col">#</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Metodo de pago</th>
+        <th scope="col">Grupo</th>
+        <th scope="col">Descripción</th>
+        <th scope="col">Monto</th>
+        <th scope="col">Recibo</th>
+        <th scope="col">Observaciones</th>
+        <th scope="col">Fecha de registro</th>
+        <th scope="col">Registrado por</th>
+        <th scope="col">Fecha de actualización</th>
+        <th scope="col">Actualizado por</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="text-nowrap" *ngFor="let m of movements();let i=index">
+        <th scope="row">{{ i + 1 }}</th>
+        <td>{{ m.type }}</td>
+        <td>{{ m.paymentMethod }}</td>
+        <td>{{ m.group }}</td>
+        <td>{{ m.description }}</td>
+        <td>{{ m.amount | currency:'S/. ':'symbol':'1.2-2' }}</td>
+        <td>
+          <img [src]="[m.receiptUrl]" alt="" width="30px" height="30px">
+        </td>
+        <td>{{ m.comments }}</td>
+        <td>{{ m.createdAt.toDate() | date:'M/d/yy, h:mm'}}</td>
+        <td>{{ m.createdBy }}</td>
+        <td>{{ m.updatedAt.toDate() | date:'medium'}}</td>
+        <td>{{ m.updatedBy }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+
+
+
+
