@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-users-list',
@@ -7,5 +8,6 @@ import { Component } from '@angular/core';
   styleUrl: './users-list.component.scss'
 })
 export class UsersListComponent {
-
+  /** injects **/
+  public router = inject(Router);
 }

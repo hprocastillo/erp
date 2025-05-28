@@ -1,0 +1,33 @@
+<!--****** header ******-->
+<div class="card shadow rounded border-light-subtle p-2 mb-2 p-xxl-3 mb-xxl-3">
+  <div class="row">
+    <div class="col-8 d-flex align-items-start">
+
+      <nav class="ms-1" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb pb-0 mb-0">
+          <li class="breadcrumb-item fs-5">
+            <a href="/dashboard" class="text-decoration-none text-dark">
+              <i class="fa-solid fa-house me-1"></i>
+              Inicio
+            </a>
+          </li>
+          <li class="breadcrumb-item active fs-5" aria-current="page">
+            Usuarios
+          </li>
+        </ol>
+      </nav>
+
+    </div>
+    <div class="col-4 d-flex justify-content-end">
+      <button type="button" class="btn btn-primary me-2" (click)="router.navigate(['/users/new'])">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+      <button type="button" class="btn btn-success me-2">
+        <i class="fa-solid fa-file-excel"></i>
+      </button>
+      <button type="button" class="btn btn-secondary">
+        <i class="fa-solid fa-print"></i>
+      </button>
+    </div>
+  </div>
+</div>
