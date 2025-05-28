@@ -24,11 +24,11 @@ export class MovementsListComponent implements OnInit {
   movements = this.service.movements;
 
   ngOnInit() {
-    this.service.listenAll();
+    this.service.getAllMovements();
   }
 
   showImageModal(url: string) {
-    const modalRef = this.modalService.open(ModalReceiptComponent, { size: 'lg' });
+    const modalRef = this.modalService.open(ModalReceiptComponent, {size: 'lg'});
     modalRef.componentInstance.imageUrl = url;
   }
 

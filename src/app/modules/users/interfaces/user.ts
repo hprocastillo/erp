@@ -5,7 +5,8 @@ export interface User {
   displayName: string;
   email: string;
   photoURL?: string;
-  role: 'ADMIN' | 'USER';
+  role: 'ADMINISTRADOR' | 'USUARIO';
+  lastLogin: Timestamp;
 
   createdBy: string;
   createdAt: Timestamp;

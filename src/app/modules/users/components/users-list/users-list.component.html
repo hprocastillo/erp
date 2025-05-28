@@ -16,18 +16,60 @@
           </li>
         </ol>
       </nav>
-
     </div>
     <div class="col-4 d-flex justify-content-end">
-      <button type="button" class="btn btn-primary me-2" (click)="router.navigate(['/users/new'])">
-        <i class="fa-solid fa-plus"></i>
-      </button>
-      <button type="button" class="btn btn-success me-2">
+      <button type="button" class="btn btn-success me-2" (click)="exportToExcel()">
         <i class="fa-solid fa-file-excel"></i>
       </button>
-      <button type="button" class="btn btn-secondary">
+      <button type="button" class="btn btn-secondary" (click)="printTable()">
         <i class="fa-solid fa-print"></i>
       </button>
     </div>
+  </div>
+</div>
+
+<!--****** list ******-->
+<div class="card shadow rounded border-light-subtle p-2 p-xxl-3">
+  <div class="table-responsive">
+    <table class="table table-striped text-center">
+      <thead>
+      <tr class="text-nowrap">
+        <th scope="col">#</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col">Nombre de Usuario</th>
+        <th scope="col">Correo electrónico</th>
+        <th scope="col">Rol</th>
+        <th scope="col">Último inicio de sesión</th>
+        <th scope="col">Fecha de registro</th>
+        <th scope="col">Registrado por</th>
+        <th scope="col">Fecha de actualización</th>
+        <th scope="col">Actualizado por</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="text-nowrap" *ngFor="let user of users();let i=index">
+        <th scope="row">{{ i + 1 }}</th>
+        <td>
+          <button type="button" class="btn btn-primary btn-sm" (click)="edit(user)">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-danger btn-sm" (click)="delete(user)">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+        <td>{{ user.displayName }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ user.lastLogin.toDate() | date:'medium' }}</td>
+        <td>{{ user.createdAt.toDate() | date:'medium' }}</td>
+        <td>{{ user.createdByName }}</td>
+        <td>{{ user.updatedAt.toDate() | date:'medium' }}</td>
+        <td>{{ user.updatedByName }}</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </div>

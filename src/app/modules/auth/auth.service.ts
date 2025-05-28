@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {Auth, authState, onAuthStateChanged, signInWithEmailAndPassword, signOut, User} from '@angular/fire/auth';
-import {doc, Firestore, setDoc, Timestamp} from '@angular/fire/firestore';
+import {doc, Firestore, getDoc, setDoc, Timestamp, updateDoc} from '@angular/fire/firestore';
 import {Router} from '@angular/router';
 
 @Injectable({
@@ -16,15 +16,17 @@ export class AuthService {
   private userSignal = signal<User | null>(null);
 
   /** Exponemos como readonly signal (solo lectura) **/
-  user = computed(() => this.userSignal());
+  public user = computed(() => this.userSignal());
 
   constructor() {
     /** Escucha cambios de autenticación **/
     onAuthStateChanged(this.auth, async (firebaseUser: any) => {
       this.userSignal.set(firebaseUser);
       if (firebaseUser) {
-        /** Al loguearse, guarda (o actualiza) los datos en "users" **/
-        await this.createOrUpdateUser(firebaseUser);
+        /** Al loguearse, solo crea el usuario si es nuevo **/
+        await this.createUserIfNotExists(firebaseUser);
+        /** Siempre actualiza el lastLogin si ya existe **/
+        await this.updateLastLogin(firebaseUser.uid);
       }
     });
   }
@@ -41,8 +43,6 @@ export class AuthService {
   async logout() {
     await signOut(this.auth);
     this.userSignal.set(null);
-
-    /** Redirigimos al login (opcional) **/
     await this.router.navigate(['/auth']);
   }
 
@@ -52,18 +52,32 @@ export class AuthService {
   }
 
   /**
-   * Crea o actualiza el documento del usuario en Firestore.
-   * Así tienes la información SIEMPRE actualizada cada vez que loguea.
+   * Crea el documento del usuario en Firestore
    **/
-  private async createOrUpdateUser(user: User) {
+  private async createUserIfNotExists(user: User): Promise<void> {
     const userRef = doc(this.firestore, `users/${user.uid}`);
-    await setDoc(userRef, {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || '',
-      photoURL: user.photoURL || '',
-      lastLogin: Timestamp.now()
-    }, {merge: true});
+    const snapshot = await getDoc(userRef);
+    if (!snapshot.exists()) {
+      const now: Timestamp = Timestamp.now();
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        role: 'USUARIO',
+        displayName: user.email,
+        createdBy: user.uid,
+        createdAt: now,
+      });
+    }
+  }
+
+  private async updateLastLogin(uid: string): Promise<void> {
+    const userRef = doc(this.firestore, `users/${uid}`);
+    const now: Timestamp = Timestamp.now();
+    await updateDoc(userRef, {
+      lastLogin: now,
+      updatedAt: now,
+      updatedBy: uid,
+    });
   }
 
   /** Acceso al uid, email, etc. **/

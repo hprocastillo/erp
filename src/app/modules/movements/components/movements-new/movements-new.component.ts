@@ -11,11 +11,11 @@ import {Router} from '@angular/router';
   styleUrl: './movements-new.component.scss'
 })
 export class MovementsNewComponent {
+  /** injects **/
   public router = inject(Router);
   public location = inject(Location);
   private fb = inject(FormBuilder);
   private service = inject(MovementsService);
-
 
   form: FormGroup;
   loading = false;
@@ -42,7 +42,7 @@ export class MovementsNewComponent {
     this.error = null;
     this.loading = true;
     try {
-      await this.service.create(this.form.value, this.selectedFile!);
+      await this.service.createMovement(this.form.value, this.selectedFile!);
       this.router.navigate(['/movements']);
     } catch (e: any) {
       this.error = e.message || 'Error al guardar';

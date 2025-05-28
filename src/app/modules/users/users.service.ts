@@ -1,16 +1,16 @@
-import {Injectable, inject} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {
-  Firestore,
   collection,
   collectionData,
+  deleteDoc,
   doc,
+  Firestore,
   getDoc,
   setDoc,
-  updateDoc,
-  deleteDoc,
-  Timestamp
+  Timestamp,
+  updateDoc
 } from '@angular/fire/firestore';
-import {from, Observable} from 'rxjs';
+import {from, Subscription} from 'rxjs';
 import {User} from './interfaces/user';
 import {AuthService} from '../auth/auth.service';
 
@@ -18,23 +18,54 @@ import {AuthService} from '../auth/auth.service';
   providedIn: 'root'
 })
 export class UsersService {
+  /** injects **/
   private firestore = inject(Firestore);
   private authService = inject(AuthService);
 
-  /** Traer todos los usuarios (reactivo) **/
-  getAll(): Observable<User[]> {
+  /** Signal cache en memoria para la lista de usuarios **/
+  private usersSignal = signal<User[] | null>(null);
+  public users = computed(() => this.usersSignal() ?? []);
+  private usersSub: Subscription | null = null;
+  private isListening = false;
+
+  /** Escucha todos los usuarios solo una vez por sesión (real time y cache) **/
+  listenAllUsers(): void {
+    if (this.isListening) return;
     const ref = collection(this.firestore, 'users');
-    return collectionData(ref, {idField: 'uid'}) as Observable<User[]>;
+    this.usersSub = collectionData(ref, {idField: 'uid'}).subscribe(
+      data => {
+        this.usersSignal.set(data as User[]);
+        this.isListening = true;
+      });
   }
 
-  /** Traer un usuario por uid **/
-  getById(uid: string) {
+  enrichedUsers = computed(() => {
+    const users: User[] = this.users();
+    /** Creamos un map UID => displayName para acceso rápido **/
+    const uidToName = new Map(users.map(u => [u.uid, u.displayName]));
+    return users.map(user => ({
+      ...user,
+      createdByName: uidToName.get(user.createdBy) ?? user.createdBy,
+      updatedByName: uidToName.get(user.updatedBy) ?? user.updatedBy,
+    }));
+  });
+
+  /** Opcional: Dejar de escuchar (por ejemplo, en logout) **/
+  stopListening(): void {
+    this.usersSub?.unsubscribe();
+    this.usersSub = null;
+    this.usersSignal.set(null);
+    this.isListening = false;
+  }
+
+  /** Trae un usuario por UID (solo cuando lo necesites individualmente) **/
+  getUserById(uid: string) {
     const docRef = doc(this.firestore, `users/${uid}`);
     return from(getDoc(docRef));
   }
 
   /** Crea un usuario en Firestore **/
-  async create(
+  async createUser(
     user: Omit<User, 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
   ): Promise<void> {
     const now = Timestamp.now();
@@ -49,10 +80,12 @@ export class UsersService {
       createdBy: currentUid,
       updatedBy: currentUid
     });
+    // Si quieres que el cache se actualice instantáneamente sin esperar el evento de Firestore:
+    // this.listenAllUsers();
   }
 
   /** Actualiza un usuario en Firestore **/
-  async update(uid: string, data: Partial<Omit<User, 'updatedAt' | 'updatedBy'>>): Promise<void> {
+  async updateUser(uid: string, data: Partial<Omit<User, 'updatedAt' | 'updatedBy'>>): Promise<void> {
     const now = Timestamp.now();
     const currentUid = this.authService.user()?.uid;
     if (!currentUid) throw new Error('No hay usuario autenticado.');
@@ -63,11 +96,15 @@ export class UsersService {
       updatedAt: now,
       updatedBy: currentUid
     });
+    // Si quieres actualizar el cache de inmediato:
+    // this.listenAllUsers();
   }
 
-  /** Eliminar usuario **/
-  async delete(uid: string) {
+  /** Elimina usuario en Firestore **/
+  async deleteUser(uid: string) {
     const docRef = doc(this.firestore, `users/${uid}`);
     await deleteDoc(docRef);
+    // Si quieres actualizar el cache de inmediato:
+    // this.listenAllUsers();
   }
 }

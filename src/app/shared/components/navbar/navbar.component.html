@@ -14,11 +14,17 @@
 
     <div class="navbar-collapse" [class.collapse]="collapsed" id="navbarContent">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" role="button">Bienvenido, {{ displayName() }}</a>
+        <li class="nav-item me-3">
+          <a class="nav-link">
+            <i class="fa-solid fa-circle-user me-1"></i>
+            Bienvenido(a), {{ displayName() }}
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" role="button" (click)="logout()">Cerrar sesión</a>
+          <a class="nav-link" role="button" (click)="logout()">
+            <i class="fa-solid fa-power-off me-1"></i>
+            Cerrar sesión
+          </a>
         </li>
       </ul>
     </div>
