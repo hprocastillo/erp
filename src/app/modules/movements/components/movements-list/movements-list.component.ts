@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {MovementsService} from '../../movements.service';
 import {CurrencyPipe, DatePipe, NgForOf} from '@angular/common';
@@ -7,24 +7,25 @@ import {ModalReceiptComponent} from '../../../../shared/components/modal-receipt
 
 @Component({
   selector: 'app-movements-list',
-  imports: [
-    NgForOf,
-    CurrencyPipe,
-    DatePipe
-  ],
+  imports: [NgForOf, CurrencyPipe, DatePipe],
   templateUrl: './movements-list.component.html',
   styleUrl: './movements-list.component.scss'
 })
-export class MovementsListComponent implements OnInit {
+export class MovementsListComponent implements OnInit, OnDestroy {
   /** injects **/
   public router = inject(Router);
   private service = inject(MovementsService);
   private modalService = inject(NgbModal);
 
+  /** variables **/
   movements = this.service.movements;
 
   ngOnInit() {
     this.service.getAllMovements();
+  }
+
+  ngOnDestroy(): void {
+    this.service.stopListening();
   }
 
   showImageModal(url: string) {

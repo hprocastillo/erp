@@ -73,7 +73,8 @@
 
         <!-- amount -->
         <div class="form-floating mb-3">
-          <input type="number" class="form-control" id="amountInput" placeholder="Monto S/." formControlName="amount" required>
+          <input type="number" class="form-control" id="amountInput" placeholder="Monto S/." formControlName="amount"
+                 required>
           <label for="amountInput">Monto S/.</label>
         </div>
 
@@ -89,13 +90,23 @@
         <!-- receipt url -->
         <div class="mb-3">
           <label for="formFile" class="form-label">Adjuntar imagen del recibo</label>
-          <input class="form-control" type="file" id="formFile" (change)="onFileSelected($event)">
+          <input class="form-control" type="file" id="formFile" accept="image/*" (change)="onFileSelected($event)"
+                 [disabled]="loading">
         </div>
 
         <!-- buttons -->
         <button type="submit" class="btn btn-success w-50" [disabled]="form.invalid || loading">Guardar</button>
+        <div class="mb-3" *ngIf="error">{{ error }}</div>
 
-        <div *ngIf="error">{{ error }}</div>
+        <div *ngIf="imagePreviewUrl" class="mt-3 position-relative" style="max-width: 200px;">
+          <img [src]="imagePreviewUrl" alt="Preview" class="img-thumbnail w-100">
+          <button type="button"
+                  class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                  style="transform: translate(30%,-30%);"
+                  (click)="removeSelectedImage()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
       </div>
       <div class="col-4">

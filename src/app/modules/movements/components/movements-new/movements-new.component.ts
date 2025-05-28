@@ -18,9 +18,10 @@ export class MovementsNewComponent {
   private service = inject(MovementsService);
 
   form: FormGroup;
-  loading = false;
-  error: string | null = null;
+  public loading = false;
+  public error: string | null = null;
   private selectedFile: File | null = null;
+  public imagePreviewUrl: string | null = null;
 
   constructor() {
     this.form = this.fb.group({
@@ -33,9 +34,18 @@ export class MovementsNewComponent {
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) this.selectedFile = file;
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // Preview de la imagen
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreviewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   async onSubmit() {
