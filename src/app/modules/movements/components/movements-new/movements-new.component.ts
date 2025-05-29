@@ -27,7 +27,6 @@ export class MovementsNewComponent {
     this.form = this.fb.group({
       type: ['INGRESO', Validators.required],
       paymentMethod: ['EFECTIVO', Validators.required],
-      group: ['NINGUNO', Validators.required],
       description: ['', Validators.required],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       comments: ['']
@@ -48,12 +47,20 @@ export class MovementsNewComponent {
     }
   }
 
+  removeSelectedImage() {
+    this.selectedFile = null;
+    this.imagePreviewUrl = null;
+    // También puedes limpiar el input file si lo necesitas
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (input) input.value = '';
+  }
+
   async onSubmit() {
     this.error = null;
     this.loading = true;
     try {
       await this.service.createMovement(this.form.value, this.selectedFile!);
-      this.router.navigate(['/movements']);
+      await this.router.navigate(['/movements']);
     } catch (e: any) {
       this.error = e.message || 'Error al guardar';
     }

@@ -1,6 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {DatePipe, NgForOf} from '@angular/common';
+
 import {UsersService} from '../../users.service';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {User} from '../../interfaces/user';
@@ -11,7 +11,7 @@ import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-users-list',
-  imports: [DatePipe, NgForOf], templateUrl: './users-list.component.html',
+  imports: [], templateUrl: './users-list.component.html',
   styleUrl: './users-list.component.scss'
 })
 export class UsersListComponent implements OnInit, OnDestroy {
@@ -22,14 +22,14 @@ export class UsersListComponent implements OnInit, OnDestroy {
   private toast = inject(ToastService);
 
   /** variables **/
-  public users = this.service.enrichedUsers;
+
 
   ngOnInit(): void {
-    this.service.listenAllUsers();
+
   }
 
   ngOnDestroy(): void {
-    this.service.stopListening();
+
   }
 
   /** Editar usuario **/
@@ -68,27 +68,27 @@ export class UsersListComponent implements OnInit, OnDestroy {
   }
 
   /** Exportar listado a excel **/
-  exportToExcel(): void {
-    const users = this.users();
-
-    /** Prepara los datos (quita los campos no necesarios) **/
-    const data = users.map(u => ({
-      "Nombre": u.displayName,
-      "Correo": u.email,
-      "Rol": u.role,
-      "Último inicio": u.lastLogin?.toDate().toLocaleString() ?? '',
-      "Fecha de registro": u.createdAt?.toDate().toLocaleString() ?? '',
-      "Registrado por": u.createdByName ?? u.createdBy,
-    }));
-
-    /** Crea la hoja y el libro **/
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
-
-    /** Descarga el archivo **/
-    XLSX.writeFile(workbook, 'usuarios.xlsx');
-  }
+  // exportToExcel(): void {
+  //   const users = this.users();
+  //
+  //   /** Prepara los datos (quita los campos no necesarios) **/
+  //   const data = users.map(u => ({
+  //     "Nombre": u.displayName,
+  //     "Correo": u.email,
+  //     "Rol": u.role,
+  //     "Último inicio": u.lastLogin?.toDate().toLocaleString() ?? '',
+  //     "Fecha de registro": u.createdAt?.toDate().toLocaleString() ?? '',
+  //     "Registrado por": u.createdByName ?? u.createdBy,
+  //   }));
+  //
+  //   /** Crea la hoja y el libro **/
+  //   const worksheet = XLSX.utils.json_to_sheet(data);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
+  //
+  //   /** Descarga el archivo **/
+  //   XLSX.writeFile(workbook, 'usuarios.xlsx');
+  // }
 
   /** Imprimir la tabla **/
   printTable() {

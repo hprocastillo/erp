@@ -1,8 +1,10 @@
-<!--****** header ******-->
-<div class="card shadow rounded border-light-subtle p-2 mb-2 p-xxl-3 mb-xxl-3">
+<!--*****************************-->
+<!--********** HEADER ***********-->
+<div class="card shadow rounded border-light-subtle p-3 mb-3">
   <div class="row">
-    <div class="col-8 d-flex align-items-start">
 
+    <!-- TITLE - NAV -->
+    <div class="col-6 d-flex align-items-start">
       <nav class="ms-1" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb pb-0 mb-0">
           <li class="breadcrumb-item fs-5">
@@ -16,27 +18,116 @@
           </li>
         </ol>
       </nav>
-
     </div>
-    <div class="col-4 d-flex justify-content-end">
+
+    <!-- BUTTONS -->
+    <div class="col-6 d-flex justify-content-end">
+
+      <!-- FILTER -->
+      <button type="button" class="btn btn-warning me-2" (click)="toggleFilters()">
+        <i class="fa-solid fa-sliders"></i>
+        Filtros
+      </button>
+
+      <!-- NEW -->
       <button type="button" class="btn btn-primary me-2" (click)="router.navigate(['/movements/new'])">
         <i class="fa-solid fa-plus"></i>
+        Nuevo
       </button>
+
+      <!-- EXPORT -->
       <button type="button" class="btn btn-success me-2">
         <i class="fa-solid fa-file-excel"></i>
+        Exportar
       </button>
-      <button type="button" class="btn btn-danger me-2">
-        <i class="fa-solid fa-file-pdf"></i>
-      </button>
+
+      <!-- PRINT -->
       <button type="button" class="btn btn-secondary">
         <i class="fa-solid fa-print"></i>
+        Imprimir
       </button>
+
     </div>
   </div>
 </div>
 
-<!--****** list ******-->
-<div class="card shadow rounded border-light-subtle p-2 p-xxl-3">
+<!--**************************-->
+<!--********** LIST **********-->
+<div class="card shadow rounded border-light-subtle p-3">
+
+  <!-- FILTERS -->
+  <div *ngIf="showFilters" [class.show]="showFilters" class="fade mb-3 pb-3" style="transition: opacity 0.3s;">
+    <form (ngSubmit)="applyFilters()" autocomplete="off">
+      <div class="row g-3 align-items-end">
+        <div class="col">
+          <label>Usuario</label>
+          <select class="form-select" [(ngModel)]="selectedUserId" name="user">
+            <option value="">Todos</option>
+            <option *ngFor="let user of users" [value]="user.uid">{{ user.displayName }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Tipo</label>
+          <select class="form-select" [(ngModel)]="selectedType" name="type">
+            <option value="">Todos</option>
+            <option value="INGRESO">Ingreso</option>
+            <option value="EGRESO">Egreso</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Método de Pago</label>
+          <select class="form-select" [(ngModel)]="selectedPayment" name="payment">
+            <option value="">Todos</option>
+            <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Mes</label>
+          <select class="form-select" [(ngModel)]="selectedMonth" name="month">
+            <option [ngValue]="''">Todos</option>
+            <option *ngFor="let m of months" [ngValue]="m.value">{{ m.name }}</option>
+          </select>
+          <!--          <select class="form-select" [(ngModel)]="selectedMonth" name="month">-->
+          <!--            <option value="">Todos</option>-->
+          <!--            <option *ngFor="let m of months" [value]="m.value">{{ m.name }}</option>-->
+          <!--          </select>-->
+        </div>
+        <div class="col">
+          <label>Año</label>
+          <select class="form-select" [(ngModel)]="selectedYear" name="year">
+            <option [ngValue]="''">Todos</option>
+            <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+          </select>
+          <!--          <select class="form-select" [(ngModel)]="selectedYear" name="year">-->
+          <!--            <option value="">Todos</option>-->
+          <!--            <option *ngFor="let y of years" [value]="y">{{ y }}</option>-->
+          <!--          </select>-->
+        </div>
+        <div class="col-auto d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-funnel"></i>
+            Aplicar
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="limpiarFiltros()">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+
+  <!-- TOTAL -->
+  <div class="mb-3">
+    <h5 class="mb-0">
+      Saldo del periodo:
+      <span [ngClass]="{'text-success': sumatoria >= 0, 'text-danger': sumatoria < 0}">
+      S/. {{ sumatoria | number: '1.2-2' }}
+    </span>
+    </h5>
+  </div>
+
+  <!-- TABLE -->
   <div class="table-responsive">
     <table class="table table-striped text-center">
       <thead>
@@ -44,7 +135,6 @@
         <th scope="col">#</th>
         <th scope="col">Tipo</th>
         <th scope="col">Metodo de pago</th>
-        <th scope="col">Grupo</th>
         <th scope="col">Descripción</th>
         <th scope="col">Monto</th>
         <th scope="col">Recibo</th>
@@ -56,29 +146,29 @@
       </tr>
       </thead>
       <tbody>
-      <tr class="text-nowrap" *ngFor="let m of movements();let i=index">
+      <tr class="text-nowrap" *ngFor="let m of filteredMovements; let i = index">
         <th scope="row">{{ i + 1 }}</th>
         <td>{{ m.type }}</td>
         <td>{{ m.paymentMethod }}</td>
-        <td>{{ m.group }}</td>
         <td>{{ m.description }}</td>
         <td>{{ m.amount | currency:'S/. ':'symbol':'1.2-2' }}</td>
         <td>
           <i class="fa-solid fa-image fa-lg" style="cursor:pointer" (click)="showImageModal(m.receiptUrl)"></i>
         </td>
         <td>{{ m.comments }}</td>
-        <td>{{ m.createdAt.toDate() | date:'M/d/yy, h:mm'}}</td>
+        <td>{{ m.createdAt.toDate() | date:'medium' }}</td>
         <td>{{ m.createdByName }}</td>
-        <td>{{ m.updatedAt.toDate() | date:'medium'}}</td>
-        <td>{{ m.updatedByName }}</td>
+        <td>{{ m.updatedAt.toDate() | date:'medium' }}</td>
+        <td>{{
+            m.updatedByName
+
+          }}
+        </td>
       </tr>
       </tbody>
     </table>
   </div>
 </div>
-
-
-
 
 
 
