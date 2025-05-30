@@ -1,12 +1,14 @@
 import {Component, inject} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MovementsService} from '../../movements.service';
 import {Location, NgIf} from '@angular/common';
 import {Router} from '@angular/router';
+import {Movement} from '../../interfaces/movement';
+import {Timestamp} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-movements-new',
-  imports: [ReactiveFormsModule, NgIf],
+  imports: [ReactiveFormsModule, NgIf, FormsModule],
   templateUrl: './movements-new.component.html',
   styleUrl: './movements-new.component.scss'
 })
@@ -22,6 +24,7 @@ export class MovementsNewComponent {
   public error: string | null = null;
   private selectedFile: File | null = null;
   public imagePreviewUrl: string | null = null;
+  public selectedDate: string | null = null;
 
   constructor() {
     this.form = this.fb.group({
@@ -55,15 +58,30 @@ export class MovementsNewComponent {
     if (input) input.value = '';
   }
 
-  async onSubmit() {
-    this.error = null;
-    this.loading = true;
-    try {
-      await this.service.createMovement(this.form.value, this.selectedFile!);
-      await this.router.navigate(['/movements']);
-    } catch (e: any) {
-      this.error = e.message || 'Error al guardar';
+  async onSubmit(): Promise<void> {
+    if (this.form.valid) {
+      this.error = null;
+      this.loading = true;
+      let movement: Movement = this.form.value;
+      let dateMovement: Date;
+      if (this.selectedDate) {
+        dateMovement = new Date(this.selectedDate + 'T12:00:00');
+      } else {
+        dateMovement = new Date();
+      }
+
+      console.log('selectedDate:', this.selectedDate);
+      console.log('dateMovement:', dateMovement);
+
+            try {
+        movement.createdAt = Timestamp.fromDate(dateMovement);
+        movement.updatedAt = Timestamp.fromDate(dateMovement);
+        await this.service.createMovement(movement, this.selectedFile!);
+        await this.router.navigate(['/movements']);
+      } catch (e: any) {
+        this.error = e.message || 'Error al guardar';
+      }
+      this.loading = false;
     }
-    this.loading = false;
   }
 }

@@ -15,7 +15,7 @@ import {AuthService} from '../auth/auth.service';
 import {UsersService} from '../users/users.service';
 import {Movement} from './interfaces/movement';
 import {combineLatest, map, Observable} from 'rxjs';
-import { User } from '../users/interfaces/user';
+import {User} from '../users/interfaces/user';
 
 @Injectable({providedIn: 'root'})
 export class MovementsService {
@@ -31,8 +31,8 @@ export class MovementsService {
     const movementsRef = collection(this.firestore, 'movements');
     const usersRef = collection(this.firestore, 'users');
     return combineLatest([
-      collectionData(movementsRef, { idField: 'id' }) as Observable<Movement[]>,
-      collectionData(usersRef, { idField: 'uid' }) as Observable<User[]>
+      collectionData(movementsRef, {idField: 'id'}) as Observable<Movement[]>,
+      collectionData(usersRef, {idField: 'uid'}) as Observable<User[]>
     ]).pipe(
       map(([movements, users]) =>
         movements.map(movement => ({
@@ -46,8 +46,9 @@ export class MovementsService {
 
   getAllUsers(): Observable<User[]> {
     const usersRef = collection(this.firestore, 'users');
-    return collectionData(usersRef, { idField: 'uid' }) as Observable<User[]>;
+    return collectionData(usersRef, {idField: 'uid'}) as Observable<User[]>;
   }
+
   // getAllMovements(): Observable<Movement[]> {
   //   const movementsRef = collection(this.firestore, 'movements');
   //   const usersRef = collection(this.firestore, 'users');
@@ -91,9 +92,7 @@ export class MovementsService {
       amount: Number(data.amount),
       receiptUrl,
       createdBy: uid,
-      createdAt: now,
       updatedBy: uid,
-      updatedAt: now,
     });
   }
 
