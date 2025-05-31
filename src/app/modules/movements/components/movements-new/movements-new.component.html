@@ -55,11 +55,10 @@
 
         <!-- date -->
         <div class="form-floating mb-3">
-          <input type="date" class="form-control" id="dateInput" placeholder="Fecha"  [(ngModel)]="selectedDate">
+          <input type="date" class="form-control" id="dateInput" placeholder="Fecha" [(ngModel)]="selectedDate"
+                 [ngModelOptions]="{standalone: true}">
           <label for="dateInput">Fecha</label>
         </div>
-
-
 
         <!-- description -->
         <div class="form-floating mb-3">
@@ -83,7 +82,7 @@
         </div>
       </div>
       <div class="col-4">
-            <!-- receipt url -->
+        <!-- receipt url -->
         <div class="mb-3">
           <label for="formFile" class="form-label">Adjuntar imagen del recibo</label>
           <input class="form-control" type="file" id="formFile" accept="image/*" (change)="onFileSelected($event)"

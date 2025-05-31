@@ -67,7 +67,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Exportar listado a excel **/
+  // /** Exportar listado a excel **/
   // exportToExcel(): void {
   //   const users = this.users();
   //

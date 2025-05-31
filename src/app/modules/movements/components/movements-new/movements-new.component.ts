@@ -64,16 +64,14 @@ export class MovementsNewComponent {
       this.loading = true;
       let movement: Movement = this.form.value;
       let dateMovement: Date;
+
       if (this.selectedDate) {
         dateMovement = new Date(this.selectedDate + 'T12:00:00');
       } else {
         dateMovement = new Date();
       }
 
-      console.log('selectedDate:', this.selectedDate);
-      console.log('dateMovement:', dateMovement);
-
-            try {
+      try {
         movement.createdAt = Timestamp.fromDate(dateMovement);
         movement.updatedAt = Timestamp.fromDate(dateMovement);
         await this.service.createMovement(movement, this.selectedFile!);

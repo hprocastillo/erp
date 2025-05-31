@@ -1,17 +1,20 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {CurrencyPipe, DatePipe, DecimalPipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {CurrencyPipe, DatePipe, DecimalPipe, NgClass, NgForOf, NgIf, SlicePipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 import {ModalReceiptComponent} from '../../../../shared/components/modal-receipt/modal-receipt.component';
+import {ModalConfirmComponent} from '../../../../shared/components/modal-confirm/modal-confirm.component';
 import {User} from '../../../users/interfaces/user';
 import {MovementsService} from '../../movements.service';
 import {UsersService} from '../../../users/users.service';
 import {Movement} from '../../interfaces/movement';
+import * as XLSX from 'xlsx';
+import {ToastService} from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-movements-list',
-  imports: [NgForOf, CurrencyPipe, FormsModule, DatePipe, NgIf, NgClass, DecimalPipe],
+  imports: [NgForOf, CurrencyPipe, FormsModule, DatePipe, NgIf, NgClass, DecimalPipe, NgbPagination, SlicePipe],
   templateUrl: './movements-list.component.html',
   styleUrl: './movements-list.component.scss'
 })
@@ -21,13 +24,15 @@ export class MovementsListComponent implements OnInit {
   private modalService = inject(NgbModal);
   private movementsService: MovementsService = inject(MovementsService);
   private usersServices: UsersService = inject(UsersService);
+  private toast = inject(ToastService);
 
   /** variables **/
-    // public users$: Observable<User[]> = this.usersServices.getAllUsers();
   public movements: Movement[] = [];
   public users: User[] = [];
   public filteredMovements: Movement[] = [];
   public sumatoria: number = 0;
+  public page: number = 1;
+  public pageSize: number = 10;
 
   /** Filters **/
   showFilters = false;
@@ -37,7 +42,7 @@ export class MovementsListComponent implements OnInit {
   selectedMonth: number | '' = '';
   selectedYear: number | '' = '';
 
-  months = [
+  public months = [
     {value: 1, name: 'Enero'}, {value: 2, name: 'Febrero'},
     {value: 3, name: 'Marzo'}, {value: 4, name: 'Abril'},
     {value: 5, name: 'Mayo'}, {value: 6, name: 'Junio'},
@@ -46,11 +51,8 @@ export class MovementsListComponent implements OnInit {
     {value: 11, name: 'Noviembre'}, {value: 12, name: 'Diciembre'}
   ];
 
-  years: number[] = [];
-
-  paymentMethods = [
-    'EFECTIVO', 'YAPE', 'TARJETA', 'TRANSFERENCIA'
-  ];
+  public years: number[] = [];
+  public paymentMethods = ['EFECTIVO', 'YAPE', 'TARJETA', 'TRANSFERENCIA'];
 
   constructor() {
     this.usersServices.getAllUsers().subscribe(users => {
@@ -73,36 +75,17 @@ export class MovementsListComponent implements OnInit {
 
     this.movementsService.getAllMovements().subscribe(movements => {
       this.movements = movements;
-      // Solo mostramos del mes actual:
-      this.applyFilters(); // Aplica filtro inicial de mes y año actual
+      this.applyFilters();
     });
-    // const currentYear = new Date().getFullYear();
-    // this.years = Array.from({length: 10}, (_, i) => currentYear - i);
-    // this.movementsService.getAllMovements().subscribe(movements => {
-    //   this.movements = movements;
-    //   this.filteredMovements = movements;
-    // });
   }
 
+  /** Visualizar filtros **/
   toggleFilters() {
     this.showFilters = !this.showFilters;
   }
 
-  // applyFilters() {
-  //   this.filteredMovements = this.movements.filter(movement => {
-  //     let valid = true;
-  //     if (this.selectedUserId) valid = valid && movement.createdBy === this.selectedUserId;
-  //     if (this.selectedType) valid = valid && movement.type === this.selectedType;
-  //     if (this.selectedPayment) valid = valid && movement.paymentMethod === this.selectedPayment;
-  //     if (this.selectedMonth && this.selectedYear) {
-  //       const movDate = movement.createdAt.toDate();
-  //       valid = valid &&
-  //         movDate.getFullYear() === Number(this.selectedYear) &&
-  //         (movDate.getMonth() + 1) === Number(this.selectedMonth);
-  //     }
-  //     return valid;
-  //   });
-  // }
+  /** *************** **/
+  /** Aplicar filtros **/
   applyFilters() {
     this.filteredMovements = this.movements.filter(movement => {
       let valid = true;
@@ -121,7 +104,7 @@ export class MovementsListComponent implements OnInit {
       return valid;
     });
 
-    // Sumar ingresos y egresos de los movimientos filtrados:
+    /** Sumar ingresos y egresos de los movimientos filtrados **/
     const ingresos = this.filteredMovements
       .filter(m => m.type === 'INGRESO')
       .reduce((acc, m) => acc + (m.amount || 0), 0);
@@ -132,14 +115,7 @@ export class MovementsListComponent implements OnInit {
     this.sumatoria = ingresos - egresos;
   }
 
-  // limpiarFiltros() {
-  //   this.selectedUserId = '';
-  //   this.selectedType = '';
-  //   this.selectedPayment = '';
-  //   this.selectedMonth = '';
-  //   this.selectedYear = '';
-  //   this.filteredMovements = this.movements;
-  // }
+  /** limpiar controles de filtros **/
   limpiarFiltros() {
     const now = new Date();
     this.selectedUserId = '';
@@ -150,8 +126,55 @@ export class MovementsListComponent implements OnInit {
     this.applyFilters();
   }
 
+  /** show modal image receipt **/
   showImageModal(url: string) {
     const modalRef = this.modalService.open(ModalReceiptComponent, {size: 'lg'});
     modalRef.componentInstance.imageUrl = url;
+  }
+
+  /** ************************ **/
+  /** Exportar listado a excel **/
+  exportToExcel(): void {
+    const movements: Movement[] = this.filteredMovements;
+    const data = movements.map(m => {
+      const fecha = m.createdAt?.toDate();
+      const mesValue = fecha ? fecha.getMonth() + 1 : null;
+      const mesObj = this.months.find(mes => mes.value === mesValue);
+      const mesNombre = mesObj ? mesObj.name : '';
+      return {
+        "Tipo": m.type,
+        "Método de Pago": m.paymentMethod,
+        "Descripción": m.description,
+        "Monto (S/.)": m.amount ? `S/. ${m.amount.toLocaleString('es-PE', {minimumFractionDigits: 2})}` : '',
+        "Observaciones": m.comments,
+        "Fecha de Movimiento": fecha ? fecha.toLocaleString('es-PE') : '',
+        "Año": fecha ? fecha.getFullYear() : '',
+        "Mes": mesNombre,
+        "Registrado Por": m.createdByName ?? m.createdBy,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Movimientos');
+    XLSX.writeFile(workbook, 'movimientos.xlsx');
+  }
+
+  /** ***************** **/
+  /** Borrar movimiento **/
+  delete(movement: Movement): void {
+    const modalRef = this.modalService.open(ModalConfirmComponent, {size: 'sm', backdrop: 'static', keyboard: false});
+    modalRef.componentInstance.title = 'Eliminar movimiento';
+    modalRef.componentInstance.message = `¿Seguro que quieres eliminar el movimiento ${movement.description}?`;
+    modalRef.result.then(
+      async (result) => {
+        if (result) {
+          await this.movementsService.deleteMovement(movement.id);
+          this.toast.show('Movimiento eliminado con éxito', 'success');
+        }
+      },
+      (): void => {
+      }
+    );
   }
 }
