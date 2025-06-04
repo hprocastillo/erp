@@ -16,6 +16,5 @@ export class DashboardComponent {
     {name: "Movimientos", url: "/movements/list", icon: "fa-solid fa-money-bill-transfer"},
     {name: "Proyectos", url: "/projects/list", icon: "fa-solid fa-building-user"},
     {name: "Clientes", url: "/customers/list", icon: "fa-solid fa-users"},
-    {name: "Usuarios", url: "/users/list", icon: "fa-regular fa-address-card"},
   ];
 }

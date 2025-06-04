@@ -5,11 +5,6 @@ export interface User {
   displayName: string;
   email: string;
   photoURL?: string;
-  role: 'ADMINISTRADOR' | 'USUARIO';
+  firstLogin: Timestamp;
   lastLogin: Timestamp;
-
-  createdBy: string;
-  createdAt: Timestamp;
-  updatedBy: string;
-  updatedAt: Timestamp;
 }

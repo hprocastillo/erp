@@ -12,16 +12,12 @@ import {RouterLink} from '@angular/router';
 export class NavbarComponent {
   /** injects **/
   private auth = inject(AuthService);
-
   /** variables **/
   public collapsed: boolean = true;
-
   /** Signal reactiva para saber si hay usuario logeado **/
   isLoggedIn = computed(() => !!this.auth.user());
-
   /** Nombre del usuario, si está logeado **/
   displayName = computed(() => this.auth.user()?.displayName ?? 'Usuario');
-  photoUrl = computed(() => this.auth.user()?.photoURL ?? '');
 
   async logout() {
     await this.auth.logout();

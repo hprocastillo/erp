@@ -1,5 +1,13 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
-import {Auth, authState, onAuthStateChanged, signInWithEmailAndPassword, signOut, User} from '@angular/fire/auth';
+import {
+  Auth,
+  authState,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  User
+} from '@angular/fire/auth';
 import {doc, Firestore, getDoc, setDoc, Timestamp, updateDoc} from '@angular/fire/firestore';
 import {Router} from '@angular/router';
 
@@ -7,6 +15,7 @@ import {Router} from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
+  /** injects **/
   private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
@@ -31,11 +40,10 @@ export class AuthService {
     });
   }
 
-  /** Login con email y password **/
-  async login(email: string, password: string) {
-    const credential = await signInWithEmailAndPassword(this.auth, email, password);
-
-    /** userSignal se actualizará automáticamente por el listener **/
+  /** Login SOLO con Google **/
+  async loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const credential = await signInWithPopup(this.auth, provider);
     return credential.user;
   }
 
@@ -58,38 +66,37 @@ export class AuthService {
     const userRef = doc(this.firestore, `users/${user.uid}`);
     const snapshot = await getDoc(userRef);
     if (!snapshot.exists()) {
-      const now: Timestamp = Timestamp.now();
       await setDoc(userRef, {
         uid: user.uid,
         email: user.email,
-        role: 'USUARIO',
-        displayName: user.email,
-        createdBy: user.uid,
-        createdAt: now,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        firstLogin: Timestamp.now(),
       });
     }
   }
 
   private async updateLastLogin(uid: string): Promise<void> {
     const userRef = doc(this.firestore, `users/${uid}`);
-    const now: Timestamp = Timestamp.now();
     await updateDoc(userRef, {
-      lastLogin: now,
-      updatedAt: now,
-      updatedBy: uid,
+      lastLogin: Timestamp.now(),
     });
   }
 
   /** Acceso al uid, email, etc. **/
-  get uid() {
+  get uid(): string | null {
     return this.userSignal()?.uid || null;
   }
 
-  get email() {
+  get email(): string | null {
     return this.userSignal()?.email || null;
   }
 
-  get displayName() {
+  get displayName(): string | null {
     return this.userSignal()?.displayName || null;
+  }
+
+  get photoURL(): string | null {
+    return this.userSignal()?.photoURL || null;
   }
 }

@@ -5,9 +5,8 @@ import {FormsModule} from '@angular/forms';
 import {NgbModal, NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 import {ModalReceiptComponent} from '../../../../shared/components/modal-receipt/modal-receipt.component';
 import {ModalConfirmComponent} from '../../../../shared/components/modal-confirm/modal-confirm.component';
-import {User} from '../../../users/interfaces/user';
+import {User} from '../../../auth/interfaces/user';
 import {MovementsService} from '../../movements.service';
-import {UsersService} from '../../../users/users.service';
 import {Movement} from '../../interfaces/movement';
 import * as XLSX from 'xlsx';
 import {ToastService} from '../../../../shared/services/toast.service';
@@ -23,7 +22,6 @@ export class MovementsListComponent implements OnInit {
   public router: Router = inject(Router);
   private modalService = inject(NgbModal);
   private movementsService: MovementsService = inject(MovementsService);
-  private usersServices: UsersService = inject(UsersService);
   private toast = inject(ToastService);
 
   /** variables **/
@@ -55,7 +53,7 @@ export class MovementsListComponent implements OnInit {
   public paymentMethods = ['EFECTIVO', 'YAPE', 'TARJETA', 'TRANSFERENCIA'];
 
   constructor() {
-    this.usersServices.getAllUsers().subscribe(users => {
+    this.movementsService.getAllUsers().subscribe(users => {
       this.users = users;
     })
     this.movementsService.getAllMovements().subscribe(movements => {

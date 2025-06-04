@@ -16,7 +16,7 @@ import {deleteObject, getDownloadURL, ref, Storage, uploadBytes} from '@angular/
 import {AuthService} from '../auth/auth.service';
 import {Movement} from './interfaces/movement';
 import {combineLatest, map, Observable} from 'rxjs';
-import {User} from '../users/interfaces/user';
+import {User} from '../auth/interfaces/user';
 
 @Injectable({providedIn: 'root'})
 export class MovementsService {
@@ -24,6 +24,12 @@ export class MovementsService {
   private firestore = inject(Firestore);
   private storage = inject(Storage);
   private auth = inject(AuthService);
+
+  /** **/
+  getAllUsers(): Observable<User[]> {
+    const usersRef = collection(this.firestore, 'users');
+    return collectionData(usersRef, {idField: 'uid'}) as Observable<User[]>;
+  }
 
   /** ****************************************************** **/
   /** Trae todos los movimientos con displayName enriquecido **/

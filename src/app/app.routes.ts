@@ -15,11 +15,6 @@ export const routes: Routes = [
     loadComponent: () => import('./shared/components/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
-    path: 'users',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./modules/users/users.routes').then(m => m.USERS_ROUTES),
-  },
-  {
     path: 'movements',
     canActivate: [AuthGuard],
     loadChildren: () => import('./modules/movements/movements.routes').then(m => m.MOVEMENTS_ROUTES),
